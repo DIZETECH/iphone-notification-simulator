@@ -2,7 +2,7 @@
 
 A free, open-source **iPhone-style notification simulator** built with pure **HTML, CSS, and JavaScript** — no frameworks, no dependencies. Design, customize, and preview realistic **iOS lock screen notifications** and **notification stacks/bundles** directly in your browser, then play them back with smooth scroll animations.
 
-🔗 **[Live Demo](#)** &nbsp;|&nbsp; 📦 **No build tools required** &nbsp;|&nbsp; ⚡ **Single HTML file**
+🔗 **[Live Demo](https://dizetech.github.io/iphone-notification-simulator/)** &nbsp;|&nbsp; 📦 **No build tools required** &nbsp;|&nbsp; ⚡ **Single HTML file**
 
 ---
 
