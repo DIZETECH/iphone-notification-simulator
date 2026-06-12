@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notification Simulator</title>
+
+<meta name="description" content="Free iPhone notification simulator — design and preview realistic iOS lock screen notifications with custom icons, text, badges, glass themes, and smooth animations. Pure HTML, CSS & JavaScript, no dependencies.">
+<meta name="keywords" content="iphone notification simulator, ios lock screen mockup, notification ui generator, fake notification preview, html css js notification, glassmorphism ui, mobile notification design tool">
+<meta property="og:title" content="iPhone Notification Simulator – Live Lock Screen Preview Tool">
+<meta property="og:description" content="Customize and preview animated iOS-style lock screen notifications. Built with pure HTML, CSS & JS — open source and free to use.">
+<meta property="og:type" content="website">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f0f2f5;
+    color: #1c1e21;
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    padding: 24px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* ---------- Left Panel ---------- */
+  .panel {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    width: 380px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .panel h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .field {
+    margin-bottom: 14px;
+  }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #555;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #dcdfe3;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fafafa;
+  }
+  .field textarea { resize: vertical; min-height: 50px; }
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+  .row .field { flex: 1; }
+  .field input[type="color"] {
+    width: 100%;
+    height: 38px;
+    border: 1px solid #dcdfe3;
+    border-radius: 8px;
+    padding: 2px;
+    background: #fafafa;
+    cursor: pointer;
+  }
+  .field input[type="range"] {
+    width: 100%;
+  }
+  .range-val {
+    font-size: 12px;
+    color: #777;
+    float: right;
+  }
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+  .icon-grid button {
+    border: 1px solid #dcdfe3;
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 6px 0;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .icon-grid button.active {
+    border-color: #1a73e8;
+    background: #e8f0fe;
+  }
+  .icon-grid button:hover {
+    background: #eef2f7;
+  }
+
+  .add-btn, .list-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: 0.15s;
+  }
+  .add-btn {
+    background: #1a73e8;
+    color: #fff;
+  }
+  .add-btn:hover { background: #1665d8; }
+
+  .queue-section {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+  }
+  .queue-list {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  .queue-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .queue-item .qi-icon {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .queue-item .qi-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .queue-item .qi-remove {
+    cursor: pointer;
+    color: #999;
+    border: none;
+    background: none;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .queue-item .qi-remove:hover { color: #d33; }
+
+  .controls-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .controls-row button {
+    flex: 1;
+  }
+  .start-btn { background: #34a853; color: #fff; }
+  .start-btn:hover { background: #2e9248; }
+  .start-btn:disabled { background: #9ccab0; cursor: not-allowed; }
+  .stop-btn { background: #ea4335; color: #fff; }
+  .stop-btn:hover { background: #d33426; }
+  .stop-btn:disabled { background: #f0aaa3; cursor: not-allowed; }
+  .clear-btn { background: #f1f3f4; color: #444; border: 1px solid #dcdfe3 !important; }
+  .clear-btn:hover { background: #e6e8ea; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .toggle-row label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+  }
+  .switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider-toggle {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    border-radius: 22px;
+    transition: 0.2s;
+  }
+  .slider-toggle:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 2px; bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  input:checked + .slider-toggle { background-color: #1a73e8; }
+  input:checked + .slider-toggle:before { transform: translateX(18px); }
+
+  /* ---------- Right Panel / Phone ---------- */
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .phone {
+    width: 320px;
+    height: 640px;
+    background: #000;
+    border-radius: 40px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    position: relative;
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(160deg, #2c2c2e, #0a0a0c);
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .notch {
+    width: 120px;
+    height: 22px;
+    background: #000;
+    border-radius: 0 0 14px 14px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 24px 4px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .clock-area {
+    text-align: center;
+    color: #fff;
+    margin-top: 24px;
+  }
+  .clock-area .time {
+    font-size: 48px;
+    font-weight: 300;
+  }
+  .clock-area .date {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+  .stack-wrap {
+    margin: 14px 14px 16px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .stack-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 8px;
+  }
+  .stack-header .stack-label {
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .stack-header .stack-close {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.9);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+  }
+  .stack-layers {
+    position: relative;
+  }
+  .stack-layers .layer {
+    position: absolute;
+    left: 6px; right: 6px;
+    border-radius: 16px;
+    background: rgba(200,200,206,0.7);
+  }
+  .stack-layers .layer.l1 {
+    bottom: -6px; height: 14px;
+    background: rgba(200,200,206,0.55);
+  }
+  .stack-layers .layer.l2 {
+    bottom: -12px; left: 12px; right: 12px; height: 14px;
+    background: rgba(180,180,188,0.4);
+  }
+  .bundle-card {
+    position: relative;
+    background: var(--card-bg, rgba(235,235,240,0.95));
+    backdrop-filter: var(--card-blur, blur(10px));
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .bundle-card .notif-icon {
+    width: 34px; height: 34px; font-size: 16px;
+    position: relative;
+  }
+  .bundle-card .notif-icon .icon-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background: #ea4335;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 1.5px solid rgba(255,255,255,0.85);
+  }
+  .bundle-card .bundle-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1c1e21;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bundle-card .bundle-sub {
+    font-size: 11.5px;
+    font-weight: 400;
+    color: #777;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .notif-list {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 14px 14px;
+    gap: 10px;
+  }
+
+  .notif-card {
+    background: var(--card-bg, rgba(235,235,240,0.92));
+    backdrop-filter: var(--card-blur, blur(10px));
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+    animation: slideInUp 0.4s forwards;
+    flex-shrink: 0;
+  }
+  @keyframes slideInUp {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .notif-card.removing {
+    animation: slideOut 0.35s forwards;
+  }
+  @keyframes slideOut {
+    to { opacity: 0; transform: translateX(120%) scale(0.9); }
+  }
+  .notif-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .notif-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .notif-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .notif-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1c1e21;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .notif-time {
+    font-size: 11px;
+    color: #8a8d91;
+    flex-shrink: 0;
+  }
+  .notif-text {
+    font-size: 12.5px;
+    color: #555;
+    margin-top: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .notif-count {
+    background: #34a853;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .empty-msg {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    margin-top: 20px;
+  }
+  .status-info {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #555;
+    min-height: 18px;
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL: Customization -->
+<div class="panel">
+  <h2>Customize Notification</h2>
+
+  <div class="field">
+    <label>Icon</label>
+    <div class="icon-grid" id="iconGrid"></div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Icon background color</label>
+      <input type="color" id="iconColor" value="#1a73e8">
+    </div>
+    <div class="field">
+      <label>Badge count</label>
+      <input type="number" id="countInput" min="0" max="999" value="1">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Title</label>
+    <input type="text" id="titleInput" maxlength="40" value="Reminder for your meetings">
+  </div>
+
+  <div class="field">
+    <label>Message text</label>
+    <textarea id="textInput" maxlength="120">Learn more about managing account info and activity</textarea>
+  </div>
+
+  <div class="field">
+    <label>Time label <span class="range-val" id="timeLabelOut"></span></label>
+    <input type="text" id="timeInput" maxlength="20" value="9min ago">
+  </div>
+
+  <button class="add-btn" id="addBtn">+ Add to queue</button>
+
+  <div class="queue-section">
+    <h2 style="font-size:15px;">Lock screen theme</h2>
+    <div class="row">
+      <div class="field">
+        <label>Background color</label>
+        <input type="color" id="bgColor" value="#0a0a0c">
+      </div>
+      <div class="field">
+        <label>Background gradient top</label>
+        <input type="color" id="bgColor2" value="#2c2c2e">
+      </div>
+    </div>
+    <div class="field">
+      <label>Notification style</label>
+      <select id="cardStyle">
+        <option value="glass">Glass (blurred, translucent)</option>
+        <option value="normal">Normal (solid)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Glass opacity <span class="range-val" id="opacityOut">92%</span></label>
+      <input type="range" id="opacityRange" min="40" max="100" step="1" value="92">
+    </div>
+  </div>
+
+  <div class="queue-section">
+    <h2 style="font-size:15px;">Notification Queue</h2>
+    <div class="queue-list" id="queueList"></div>
+
+    <div class="toggle-row">
+      <label>Loop queue</label>
+      <label class="switch">
+        <input type="checkbox" id="loopToggle">
+        <span class="slider-toggle"></span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label>Delay before first notification (sec) <span class="range-val" id="startDelayOut">1.0s</span></label>
+      <input type="range" id="startDelay" min="0" max="5" step="0.1" value="1">
+    </div>
+
+    <div class="field">
+      <label>Speed between notifications (sec) <span class="range-val" id="speedOut">2.0s</span></label>
+      <input type="range" id="speedRange" min="0.3" max="8" step="0.1" value="2">
+    </div>
+
+    <div class="field">
+      <label>Auto-dismiss each after (sec, 0 = never) <span class="range-val" id="dismissOut">0s</span></label>
+      <input type="range" id="dismissRange" min="0" max="10" step="0.5" value="0">
+    </div>
+
+    <div class="field">
+      <label>Max visible notifications <span class="range-val" id="maxVisOut">4</span></label>
+      <input type="range" id="maxVisRange" min="1" max="8" step="1" value="4">
+    </div>
+
+    <div class="controls-row">
+      <button class="add-btn start-btn" id="startBtn">▶ Start</button>
+      <button class="add-btn stop-btn" id="stopBtn" disabled>■ Stop</button>
+    </div>
+    <div class="controls-row">
+      <button class="add-btn clear-btn" id="clearQueueBtn">Clear queue</button>
+      <button class="add-btn clear-btn" id="clearScreenBtn">Clear screen</button>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL: Phone Preview -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span id="statusTime">9:41</span>
+        <span>📶 🔋 100%</span>
+      </div>
+      <div class="clock-area">
+        <div class="time" id="clockTime">9:41</div>
+        <div class="date" id="clockDate"></div>
+      </div>
+      <div class="stack-wrap" id="bundleCard" style="display:none;">
+        <div class="stack-header">
+          <span class="stack-label" id="stackLabel">Missed</span>
+          <button class="stack-close" id="stackClose" aria-label="Dismiss"><i class="ti ti-x" aria-hidden="true">✕</i></button>
+        </div>
+        <div class="stack-layers">
+          <div class="layer l2"></div>
+          <div class="layer l1"></div>
+          <div class="bundle-card">
+            <div class="notif-icon" id="bundleIcon" style="background:#1a73e8;">🔔<span class="icon-badge" id="bundleIconBadge">1</span></div>
+            <div>
+              <div class="bundle-text" id="bundleTitle">Notifications</div>
+              <div class="bundle-sub" id="bundleSub">Tap to view all</div>
+            </div>
+            <div class="notif-count" id="bundleCount">1</div>
+          </div>
+        </div>
+      </div>
+      <div class="notif-list" id="notifStack">
+        <div class="empty-msg" id="emptyMsg">No notifications yet — build one on the left and press Start</div>
+      </div>
+    </div>
+  </div>
+  <div class="status-info" id="statusInfo"></div>
+</div>
+
+<script>
+/* ---------------- Icon options ---------------- */
+const ICONS = ['🔔','💬','📧','📅','❤️','📷','🎵','📞','⚠️','✅','🛒','🎮','📰','💰','📦','⭐'];
+const iconGrid = document.getElementById('iconGrid');
+let selectedIcon = '🔔';
+
+ICONS.forEach((ic, idx) => {
+  const btn = document.createElement('button');
+  btn.textContent = ic;
+  if (idx === 0) btn.classList.add('active');
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#iconGrid button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedIcon = ic;
+  });
+  iconGrid.appendChild(btn);
+});
+
+/* ---------------- Elements ---------------- */
+const titleInput = document.getElementById('titleInput');
+const textInput = document.getElementById('textInput');
+const timeInput = document.getElementById('timeInput');
+const iconColor = document.getElementById('iconColor');
+const countInput = document.getElementById('countInput');
+const addBtn = document.getElementById('addBtn');
+const queueList = document.getElementById('queueList');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const clearQueueBtn = document.getElementById('clearQueueBtn');
+const clearScreenBtn = document.getElementById('clearScreenBtn');
+const loopToggle = document.getElementById('loopToggle');
+const startDelay = document.getElementById('startDelay');
+const speedRange = document.getElementById('speedRange');
+const dismissRange = document.getElementById('dismissRange');
+const maxVisRange = document.getElementById('maxVisRange');
+const startDelayOut = document.getElementById('startDelayOut');
+const speedOut = document.getElementById('speedOut');
+const dismissOut = document.getElementById('dismissOut');
+const maxVisOut = document.getElementById('maxVisOut');
+const notifStack = document.getElementById('notifStack');
+const emptyMsg = document.getElementById('emptyMsg');
+const statusInfo = document.getElementById('statusInfo');
+
+/* ---------------- Live range labels ---------------- */
+function updateRangeLabels() {
+  startDelayOut.textContent = parseFloat(startDelay.value).toFixed(1) + 's';
+  speedOut.textContent = parseFloat(speedRange.value).toFixed(1) + 's';
+  dismissOut.textContent = (dismissRange.value === '0') ? '0s (never)' : parseFloat(dismissRange.value).toFixed(1) + 's';
+  maxVisOut.textContent = maxVisRange.value;
+}
+[startDelay, speedRange, dismissRange, maxVisRange].forEach(el => el.addEventListener('input', updateRangeLabels));
+updateRangeLabels();
+
+/* ---------------- Queue management ---------------- */
+let queue = [];
+let queueIdCounter = 0;
+let isRunning = false;
+let timers = []; // track all setTimeout ids so Stop can clear everything
+let currentIndex = 0;
+let totalCount = 0;
+
+function renderQueue() {
+  queueList.innerHTML = '';
+  if (queue.length === 0) {
+    queueList.innerHTML = '<div style="font-size:12px;color:#999;text-align:center;padding:10px 0;">Queue is empty</div>';
+    return;
+  }
+  queue.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'queue-item';
+    div.innerHTML = `
+      <div class="qi-icon" style="background:${item.color}">${item.icon}</div>
+      <div class="qi-text"><b>${idx+1}.</b> ${escapeHtml(item.title)}</div>
+      <span style="color:#34a853;font-size:11px;font-weight:700;">${item.count}</span>
+      <button class="qi-remove" data-idx="${idx}" title="Remove">✕</button>
+    `;
+    queueList.appendChild(div);
+  });
+  queueList.querySelectorAll('.qi-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      queue.splice(idx, 1);
+      renderQueue();
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+addBtn.addEventListener('click', () => {
+  const title = titleInput.value.trim() || 'Notification';
+  const text = textInput.value.trim() || '';
+  const time = timeInput.value.trim() || 'now';
+  const color = iconColor.value;
+  const count = parseInt(countInput.value) || 0;
+  queue.push({ id: queueIdCounter++, icon: selectedIcon, color, title, text, time, count });
+  renderQueue();
+});
+
+clearQueueBtn.addEventListener('click', () => {
+  queue = [];
+  renderQueue();
+});
+
+clearScreenBtn.addEventListener('click', () => {
+  notifStack.innerHTML = '';
+  totalCount = 0;
+  document.getElementById('bundleCard').style.display = 'none';
+  if (!isRunning) {
+    notifStack.appendChild(emptyMsg);
+  }
+});
+
+renderQueue();
+
+document.getElementById('stackClose').addEventListener('click', () => {
+  document.getElementById('bundleCard').style.display = 'none';
+  totalCount = 0;
+});
+
+/* ---------------- Theme controls ---------------- */
+const screenEl = document.querySelector('.screen');
+const bgColor = document.getElementById('bgColor');
+const bgColor2 = document.getElementById('bgColor2');
+const cardStyle = document.getElementById('cardStyle');
+const opacityRange = document.getElementById('opacityRange');
+const opacityOut = document.getElementById('opacityOut');
+
+function hexToRgb(hex) {
+  const v = hex.replace('#','');
+  const num = parseInt(v, 16);
+  return [(num>>16)&255, (num>>8)&255, num&255];
+}
+
+function applyTheme() {
+  screenEl.style.background = `linear-gradient(160deg, ${bgColor2.value}, ${bgColor.value})`;
+
+  const opacity = parseInt(opacityRange.value) / 100;
+  opacityOut.textContent = opacityRange.value + '%';
+
+  if (cardStyle.value === 'glass') {
+    const [r,g,b] = hexToRgb('#ebebf0');
+    screenEl.style.setProperty('--card-bg', `rgba(${r},${g},${b},${opacity})`);
+    screenEl.style.setProperty('--card-blur', 'blur(10px)');
+  } else {
+    const [r,g,b] = hexToRgb('#f5f5f7');
+    screenEl.style.setProperty('--card-bg', `rgba(${r},${g},${b},${opacity})`);
+    screenEl.style.setProperty('--card-blur', 'none');
+  }
+}
+
+[bgColor, bgColor2, cardStyle, opacityRange].forEach(el => el.addEventListener('input', applyTheme));
+applyTheme();
+
+/* ---------------- Clock ---------------- */
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2,'0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  document.getElementById('clockTime').textContent = `${h12}:${m}`;
+  document.getElementById('statusTime').textContent = `${h12}:${m}`;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('clockDate').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ---------------- Notification rendering ---------------- */
+function showNotification(item) {
+  if (emptyMsg.parentNode === notifStack) {
+    notifStack.removeChild(emptyMsg);
+  }
+
+  totalCount++;
+
+  // update bundle card
+  const bundleCard = document.getElementById('bundleCard');
+  const bundleIcon = document.getElementById('bundleIcon');
+  const bundleTitle = document.getElementById('bundleTitle');
+  const bundleSub = document.getElementById('bundleSub');
+  const bundleCount = document.getElementById('bundleCount');
+
+  bundleCard.style.display = 'block';
+  bundleIcon.style.background = item.color;
+  bundleIcon.firstChild.nodeType === Node.TEXT_NODE
+    ? (bundleIcon.firstChild.textContent = item.icon)
+    : bundleIcon.insertBefore(document.createTextNode(item.icon), bundleIcon.firstChild);
+  bundleTitle.textContent = item.title;
+  bundleSub.textContent = totalCount > 1 ? `+${totalCount - 1} more notification${totalCount-1>1?'s':''}` : 'Tap to view';
+  bundleCount.textContent = totalCount > 99 ? '99+' : totalCount;
+  document.getElementById('bundleIconBadge').textContent = totalCount > 99 ? '99+' : totalCount;
+
+  // FLIP: record current positions of existing cards before layout shifts
+  const existingCards = Array.from(notifStack.querySelectorAll('.notif-card'));
+  const oldRects = existingCards.map(c => c.getBoundingClientRect());
+
+  const card = document.createElement('div');
+  card.className = 'notif-card';
+  card.innerHTML = `
+    <div class="notif-icon" style="background:${item.color}">${item.icon}</div>
+    <div class="notif-body">
+      <div class="notif-top">
+        <span class="notif-title">${escapeHtml(item.title)}</span>
+        <span class="notif-time">${escapeHtml(item.time)}</span>
+      </div>
+      <div class="notif-text">${escapeHtml(item.text)}</div>
+    </div>
+  `;
+
+  notifStack.appendChild(card);
+
+  // play the shift-up for previously existing cards (FLIP technique)
+  existingCards.forEach((c, i) => {
+    const newRect = c.getBoundingClientRect();
+    const deltaY = oldRects[i].top - newRect.top;
+    if (deltaY) {
+      c.style.transition = 'none';
+      c.style.transform = `translateY(${deltaY}px)`;
+      requestAnimationFrame(() => {
+        c.style.transition = 'transform 0.4s ease';
+        c.style.transform = 'translateY(0)';
+      });
+    }
+  });
+
+  // keep only maxVis cards visible — remove the oldest instantly (no
+  // reverse animation), so a card either shows fully or not at all
+  const maxVis = parseInt(maxVisRange.value);
+  const cards = notifStack.querySelectorAll('.notif-card');
+  if (cards.length > maxVis) {
+    const overflow = cards.length - maxVis;
+    for (let i = 0; i < overflow; i++) {
+      cards[i].remove();
+    }
+  }
+
+  // auto dismiss
+  const dismissAfter = parseFloat(dismissRange.value);
+  if (dismissAfter > 0) {
+    const t = setTimeout(() => removeCard(card), dismissAfter * 1000);
+    timers.push(t);
+  }
+}
+
+function removeCard(card) {
+  if (!card || !card.parentNode) return;
+  card.classList.add('removing');
+  const t = setTimeout(() => {
+    if (card.parentNode) card.parentNode.removeChild(card);
+    if (notifStack.querySelectorAll('.notif-card').length === 0 && !isRunning) {
+      notifStack.appendChild(emptyMsg);
+    }
+  }, 380);
+  timers.push(t);
+}
+
+/* ---------------- Run sequence ---------------- */
+function clearAllTimers() {
+  timers.forEach(t => clearTimeout(t));
+  timers = [];
+}
+
+function setRunningState(running) {
+  isRunning = running;
+  startBtn.disabled = running;
+  stopBtn.disabled = !running;
+  addBtn.disabled = false;
+}
+
+startBtn.addEventListener('click', () => {
+  if (queue.length === 0) {
+    statusInfo.textContent = 'Add at least one notification to the queue first.';
+    return;
+  }
+  setRunningState(true);
+  currentIndex = 0;
+  totalCount = 0;
+  notifStack.innerHTML = '';
+  document.getElementById('bundleCard').style.display = 'none';
+  if (notifStack.querySelectorAll('.notif-card').length === 0) notifStack.appendChild(emptyMsg);
+  statusInfo.textContent = 'Running...';
+
+  const delayMs = parseFloat(startDelay.value) * 1000;
+  const speedMs = parseFloat(speedRange.value) * 1000;
+
+  function step() {
+    if (!isRunning) return;
+    if (currentIndex >= queue.length) {
+      if (loopToggle.checked) {
+        currentIndex = 0;
+      } else {
+        statusInfo.textContent = 'Done. All notifications shown.';
+        setRunningState(false);
+        return;
+      }
+    }
+    showNotification(queue[currentIndex]);
+    statusInfo.textContent = `Showing ${currentIndex+1} of ${queue.length}`;
+    currentIndex++;
+    const t = setTimeout(step, speedMs);
+    timers.push(t);
+  }
+
+  const t0 = setTimeout(step, delayMs);
+  timers.push(t0);
+});
+
+stopBtn.addEventListener('click', () => {
+  setRunningState(false);
+  clearAllTimers();
+  statusInfo.textContent = 'Stopped.';
+});
+</script>
+</body>
+</html>
